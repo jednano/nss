@@ -10,7 +10,7 @@ describe('Compiler', function() {
 	glob('test/compiler/*', options, function(err, testCases) {
 		testCases.forEach(function(testCase) {
 			describe(testCase, function() {
-				compile('test/compiler/' + testCase + '/input.js');
+				compile(testCase + '/input.js');
 			});
 		});
 	});
@@ -24,7 +24,7 @@ function compile(inputPath) {
 			if (err) {
 				throw err;
 			}
-			var expectedPath = inputPath.replace('input.js', 'expected.js');
+			var expectedPath = inputPath.replace('input.js', 'expected.css');
 			fs.readFile(expectedPath, 'utf8', function(err2, expected) {
 				if (err2) {
 					throw err2;

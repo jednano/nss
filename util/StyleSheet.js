@@ -6,21 +6,25 @@ var Color = require('./Color');
 
 function StyleSheet(options) {
 	options = options || {};
-	this.level = options.level || 0;
 	this.indentChar = options.indentChar || '	';
-	this.data = '';
+	this.selectors = [];
+	this.isFirstSelector = true;
+	this.css = '';
 }
 
 StyleSheet.prototype = {
 
 	interpret: function(hash, callback) {
-		Object.keys(hash).forEach(this.onEachHashKey.bind(this));
+		Object.keys(hash).forEach(this.onEachHashKey.bind(this, hash));
 		if (typeof callback === 'function') {
-			callback(css);
+			if (!this.isFirstSelector) {
+				this.css += '}' + os.EOL;
+			}
+			callback(this.css);
 		}
 	},
 
-	onEachHashKey: function(key) {
+	onEachHashKey: function(hash, key) {
 		var value = hash[key];
 		switch(typeof value) {
 			case 'string':
@@ -43,24 +47,34 @@ StyleSheet.prototype = {
 	},
 
 	formatAttribute: function(key, value, parser) {
-		this.indent();
-		this.data += key + ': ';
-		this.data += parser(value) + ';';
-		this.data += os.EOL;
+		this.css += this.indentChar;
+		this.css += key.dasherize() + ': ';
+		this.css += parser(value) + ';';
+		this.css += os.EOL;
 	},
 
 	formatSelector: function(key, value) {
-		this.indent();
-		this.data += key + ' {' + os.EOL;
-		this.level++;
+		if (this.isFirstSelector) {
+			this.isFirstSelector = false;
+		} else {
+			this.css += '}' + os.EOL.repeat(2);
+		}
+		this.selectors.push(key.split(/[ ,]+/));
+		this.css += this.cartesianProductOfSelectors();
+		this.css += ' {' + os.EOL;
 		this.interpret(value);
-		this.level--;
-		this.indent();
-		this.data += '}' + os.EOL;
+		this.selectors.pop();
 	},
 
-	indent: function() {
-		this.data += this.indentChar.repeat(this.level);
+	cartesianProductOfSelectors: function() {
+		var result = this.selectors.reduce(function(a, b) {
+			return a.map(function(x) {
+				return b.map(function(y) {
+					return [x, y].join(' ');
+				});
+			});
+		})[0];
+		return typeof result === 'string' ? result : result.join(', ');
 	},
 
 	formatString: function(s) {
