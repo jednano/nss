@@ -1,0 +1,42 @@
+{
+  "name": "nss",
+  "version": "0.0.1",
+  "author": "Jed Hunsaker <jed.hunsaker[at]gmail.com>",
+  "description": "Node Style Sheets: A CSS Preprocessor in JavaScript Syntax",
+  "bin": {
+    "nss": "./bin/naa"
+  },
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/jedhunsaker/nss.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jedhunsaker/nss/issues"
+  },
+  "keywords": [
+    "css",
+    "preprocessor",
+    "style",
+    "sheets",
+    "sass",
+    "scss",
+    "compass",
+    "less",
+    "stylus"
+  ],
+  "dependencies": {
+    "cli-color": "~0.2.2",
+    "gitlike-cli": "~0.0.9",
+    "glob": "~3.2.1",
+    "node.extend": "~1.0.7"
+  },
+  "devDependencies": {
+    "chai": "~1.6.0",
+    "mocha": "~1.11.0"
+  },
+  "engine": "node >= 0.10.6",
+  "license": "MIT"
+}
