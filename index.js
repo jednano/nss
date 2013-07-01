@@ -6,6 +6,8 @@ module.exports = {
 	compile : function() {
 		var compiler = new Compiler();
 		compiler.compile.apply(this, arguments);
-	}
+	},
+
+	Color: require('./util/Color')
 
 };

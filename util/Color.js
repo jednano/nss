@@ -80,7 +80,7 @@ Color.prototype = {
 		if (canShorten) {
 			code = segments.map(function(s) {
 				return s.substr(1);
-			});
+			}).join('');
 		}
 		return '#' + code;
 	}

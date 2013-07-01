@@ -9,18 +9,18 @@ describe('Compiler', function() {
 
 	glob('test/compiler/*', options, function(err, testCases) {
 		testCases.forEach(function(testCase) {
-			describe(testCase, function() {
-				compile(testCase + '/input.js');
-			});
+			var feature = testCase.match(/[^\/]+$/)[0];
+			compile(testCase + '/input.js', feature);
 		});
 	});
 });
 
 var compiler = new Compiler();
 
-function compile(inputPath) {
-	it('generates expected css', function(done) {
-		compiler.compile(inputPath, function(err, output) {
+function compile(inputPath, feature) {
+	it('supports ' + feature, function(done) {
+		var options = { isTesting: true };
+		compiler.compile(inputPath, options, function(err, output) {
 			if (err) {
 				throw err;
 			}

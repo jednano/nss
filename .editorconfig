@@ -1,6 +1,6 @@
 root = true
 
-[*.{js,nss}]
+[*.js]
 ; EditorConfig supported properties
 indent_style = tab
 trim_trailing_whitespace = true

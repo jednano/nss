@@ -1,11 +1,12 @@
-﻿var os = require('os');
-var util = require('util');
+﻿var util = require('util');
 
 var Color = require('./Color');
 
 
 function StyleSheet(options) {
 	options = options || {};
+	options.EOL = options.EOL || '\n';
+	this.options = options;
 	this.indentChar = options.indentChar || '	';
 	this.selectors = [];
 	this.isFirstSelector = true;
@@ -14,11 +15,27 @@ function StyleSheet(options) {
 
 StyleSheet.prototype = {
 
+	prefixes: [
+		'background',
+		'border',
+		'counter',
+		'font',
+		'grid',
+		'margin',
+		'max',
+		'min',
+		'outline',
+		'overflow',
+		'padding',
+		'text',
+		'word'
+	],
+
 	interpret: function(hash, callback) {
 		Object.keys(hash).forEach(this.onEachHashKey.bind(this, hash));
 		if (typeof callback === 'function') {
 			if (!this.isFirstSelector) {
-				this.css += '}' + os.EOL;
+				this.css += '}' + this.options.EOL;
 			}
 			callback(this.css);
 		}
@@ -28,19 +45,27 @@ StyleSheet.prototype = {
 		var value = hash[key];
 		switch(typeof value) {
 			case 'string':
-				this.formatAttribute(key, value, this.formatString);
+				this.formatAttribute(key, value, this.formatString.bind(this));
 				return;
 			case 'number':
-				this.formatAttribute(key, value, this.formatNumber);
+				this.formatAttribute(key, value, this.formatNumber.bind(this));
 				return;
 			default:
 				if (util.isArray(value)) {
-					this.formatAttribute(key, value, this.formatArray);
+					this.formatAttribute(key, value, this.formatArray.bind(this));
 					return;
 				}
 				if (value instanceof Color) {
-					this.formatAttribute(key, value.toString(), this.formatString);
+					this.formatAttribute(key, value.toString(), this.formatString.bind(this));
 					return;
+				}
+				if (~this.prefixes.indexOf(key)) {
+					this.prefix = key.toLowerCase();
+					this.interpret(value);
+					return;
+				}
+				if (this.prefix) {
+					delete this.prefix;
 				}
 				this.formatSelector(key, value);
 		}
@@ -48,20 +73,24 @@ StyleSheet.prototype = {
 
 	formatAttribute: function(key, value, parser) {
 		this.css += this.indentChar;
+		key = key.dasherize();
+		if (this.prefix) {
+			key = this.prefix + '-' + key;
+		}
 		this.css += key.dasherize() + ': ';
 		this.css += parser(value) + ';';
-		this.css += os.EOL;
+		this.css += this.options.EOL;
 	},
 
 	formatSelector: function(key, value) {
 		if (this.isFirstSelector) {
 			this.isFirstSelector = false;
 		} else {
-			this.css += '}' + os.EOL.repeat(2);
+			this.css += '}' + this.options.EOL.repeat(2);
 		}
 		this.selectors.push(key.split(/[ ,]+/));
 		this.css += this.cartesianProductOfSelectors();
-		this.css += ' {' + os.EOL;
+		this.css += ' {' + this.options.EOL;
 		this.interpret(value);
 		this.selectors.pop();
 	},
@@ -70,7 +99,7 @@ StyleSheet.prototype = {
 		var result = this.selectors.reduce(function(a, b) {
 			return a.map(function(x) {
 				return b.map(function(y) {
-					return [x, y].join(' ');
+					return [x, y].join(' ').replace(/ &/g, '');
 				});
 			});
 		})[0];
@@ -88,7 +117,7 @@ StyleSheet.prototype = {
 	formatArray: function(a) {
 		a = a.map(function(n) {
 			return this.formatNumber(n);
-		});
+		}.bind(this));
 		return a.join(' ');
 	}
 
